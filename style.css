@@ -1,0 +1,25 @@
+* {
+    font-family: 'Do Hyeon', sans-serif;
+    font-size: 1.1em;
+}
+.calculator_display{
+    text-align: right;
+    max-width: 370px;
+    background: black;
+    color: white;
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-top:10px;
+    padding-bottom: 10px;
+    font-size: 2.5em;
+}
+.calculator_keys {
+    display: grid;
+    grid-template-columns: 100px 100px 100px 100px;
+    grid-template-rows: 70px 70px 70px 70px 70px 70px;
+}
+.key--equal{
+    grid-column: 4;
+    grid-row: 2 / 6;
+    background: tomato;
+}
