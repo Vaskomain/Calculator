@@ -23,3 +23,6 @@
     grid-row: 2 / 6;
     background: tomato;
 }
+.is-depressed{
+    background: slategrey;
+}
