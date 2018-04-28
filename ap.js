@@ -19,13 +19,13 @@ function calculate(firstValue, secondValue, action) {
     return 0;
 }
 
-function getDisplayedOutput(action, currentDisplayText, previousKeyType, keyContent, firstValue, operator) {
+function getDisplayedOutput(action, currentDisplayText, keyContent, dataset) {
     const result = {
         displayText: currentDisplayText,
         pressedOperator: isOperator(action) ? action : undefined
     };
     if (!action) { //number
-        if (currentDisplayText == '0' || isOperator(previousKeyType) || previousKeyType === 'calculate') {
+        if (currentDisplayText == '0' || isOperator(dataset.previousKeyType) || dataset.previousKeyType === 'calculate') {
             result.displayText = keyContent;
         } else {
             result.displayText += keyContent;
@@ -33,14 +33,14 @@ function getDisplayedOutput(action, currentDisplayText, previousKeyType, keyCont
     }
     switch (action) {
         case 'decimal':
-            if (isOperator(previousKeyType) || previousKeyType === 'calculate') {
+            if (isOperator(dataset.previousKeyType) || dataset.previousKeyType === 'calculate') {
                 result.displayText = '0.';
             } else if (!currentDisplayText.includes('.')) {
                 result.displayText += '.';
             }
             break;
         case 'calculate':
-            if (operator) result.displayText = calculate(firstValue, currentDisplayText, operator);
+            if (dataset.operator) result.displayText = calculate(dataset.firstValue, currentDisplayText, dataset.operator);
             break;
         case 'clear':
             result.displayText = 0;
@@ -82,10 +82,8 @@ keys.addEventListener('click', e => {
             pressedOperator
         } = getDisplayedOutput(action,
             displayedNum,
-            calculator.dataset.previousKeyType,
             key.textContent,
-            calculator.dataset.firstValue,
-            calculator.dataset.operator
+            calculator.dataset
         );
         updateDisplay(displayText, pressedOperator);
         calculator.dataset.previousKeyType = action;
