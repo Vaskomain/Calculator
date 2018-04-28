@@ -1,71 +1,97 @@
 const calculator = document.querySelector(".calculator");
 const keys = document.querySelector(".calculator_keys");
 const display = document.querySelector(".calculator_display");
+const operatorKeys = document.querySelectorAll(".key--operator");
 
 function calculate(firstValue, secondValue, action) {
-    let result = "";
-    if (action === 'add') {
-        result = parseFloat(firstValue) + parseFloat(secondValue);
-    } else if (action === 'subtract') {
-        result = parseFloat(firstValue) - parseFloat(secondValue);
-    } else if (action === 'multiply') {
-        result = parseFloat(firstValue) * parseFloat(secondValue);
-    } else if (action === 'divide') {
-        result = parseFloat(firstValue) / parseFloat(secondValue);
+    const N1 = parseFloat(firstValue),
+        N2 = parseFloat(secondValue);
+    switch (action) {
+        case 'add':
+            return N1 + N2;
+        case 'subtract':
+            return N1 - N2;
+        case 'multiply':
+            return N1 * N2;
+        case 'divide':
+            return N1 / N2;
+    }
+    return 0;
+}
+
+function getDisplayedOutput(action, currentDisplayText, previousKeyType, keyContent, firstValue, operator) {
+    const result = {
+        displayText: currentDisplayText,
+        pressedOperator: isOperator(action) ? action : undefined
+    };
+    if (!action) { //number
+        if (currentDisplayText == '0' || isOperator(previousKeyType) || previousKeyType === 'calculate') {
+            result.displayText = keyContent;
+        } else {
+            result.displayText += keyContent;
+        }
+    }
+    switch (action) {
+        case 'decimal':
+            if (isOperator(previousKeyType) || previousKeyType === 'calculate') {
+                result.displayText = '0.';
+            } else if (!currentDisplayText.includes('.')) {
+                result.displayText += '.';
+            }
+            break;
+        case 'calculate':
+            if (operator) result.displayText = calculate(firstValue, currentDisplayText, operator);
+            break;
+        case 'clear':
+            result.displayText = 0;
     }
     return result;
+}
+
+function isOperator(action) {
+    if (
+        action === 'add' ||
+        action === 'subtract' ||
+        action === 'multiply' ||
+        action === 'divide'
+    ) return true;
+    return false;
+}
+
+function updateDisplay(displayText, pressedOperator) {
+    display.textContent = displayText;
+    if (pressedOperator) {
+        Array.from(operatorKeys)
+            .forEach(k => {
+                if (k.dataset.action === pressedOperator) {
+                    k.classList.add('is-depressed');
+                } else {
+                    k.classList.remove("is-depressed");
+                }
+            });
+    }
 }
 
 keys.addEventListener('click', e => {
     if (e.target.matches('button')) {
         const key = e.target;
         const action = key.dataset.action;
-        const keyContent = key.textContent;
         const displayedNum = display.textContent;
-        const previousKeyType = calculator.dataset.previousKeyType;
-        if (!action) {
-            calculator.dataset.previousKeyType = 'number';
-            if (displayedNum == '0' || previousKeyType === 'operator' || previousKeyType === 'calculate') {
-                display.textContent = keyContent;
-            } else {
-                display.textContent = displayedNum + keyContent;
-            }
-        }
-        if (action === 'decimal') {
-            calculator.dataset.previousKeyType = 'decimal';
-            if (previousKeyType === 'operator' || previousKeyType === 'calculate') {
-                display.textContent = '0.';
-            } else if (!displayedNum.includes('.')) {
-                display.textContent = displayedNum + '.';
-            }
-        }
-        if (
-            action === 'add' ||
-            action === 'subtract' ||
-            action === 'multiply' ||
-            action === 'divide'
-        ) {
-            calculator.dataset.previousKeyType = 'operator';
+        const {
+            displayText,
+            pressedOperator
+        } = getDisplayedOutput(action,
+            displayedNum,
+            calculator.dataset.previousKeyType,
+            key.textContent,
+            calculator.dataset.firstValue,
+            calculator.dataset.operator
+        );
+        updateDisplay(displayText, pressedOperator);
+        calculator.dataset.previousKeyType = action;
+        if (isOperator(action)) {
             calculator.dataset.firstValue = displayedNum;
             calculator.dataset.operator = action;
-            Array.from(key.parentNode.children)
-                .forEach(k => k.classList.remove("is-depressed"));
-            key.classList.add('is-depressed');
-
-        }
-        if (action === 'calculate') {
-            calculator.dataset.previousKeyType = 'calculate';
-            const secondValue = displayedNum;
-            const firstValue = calculator.dataset.firstValue;
-            const actionToPerform = calculator.dataset.operator;
-            if (!actionToPerform) {
-                return null;
-            }
-            display.textContent = calculate(firstValue, secondValue, actionToPerform);
-        }
-        if (action === 'clear') {
-            calculator.dataset.previousKeyType = 'clear';
-            display.textContent = 0;
         }
     }
 });
